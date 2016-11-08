@@ -25,15 +25,17 @@ public class GPolygon extends GShape {
 	}
 	public void continueDrawing(int x, int y, Graphics2D g2D) {
 		this.polygon.addPoint(x, y);
+		this.draw(g2D);
 	}
 	@Override
 	public void finishDrawing(int x, int y, Graphics2D g2D) {
-	//	this.polygon.addPoint(x, y);
+		this.polygon.addPoint(x, y);
+		this.polygon.addPoint(this.polygon.xpoints[0], this.polygon.ypoints[0]);
+		this.draw(g2D);
 	}
 	@Override
 	public void draw(Graphics2D g2D) {
-		g2D.drawPolyline(this.polygon.xpoints, this.polygon.ypoints, this.polygon.npoints);
-		
-		g2D.draw(polygon);
+		g2D.drawPolyline(this.polygon.xpoints, this.polygon.ypoints, this.polygon.npoints);	
+	//	g2D.draw(polygon);
 	}
 }

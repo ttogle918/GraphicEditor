@@ -1,6 +1,8 @@
 package frames;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.Vector;
@@ -9,19 +11,26 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import constants.GConstants.EDrawingType;
+import shapes.Anchors;
+import shapes.GPolygon;
 import shapes.GShape;
 
 public class GDrawingPanel extends JPanel {
 	// attributes
 	private static final long serialVersionUID = 1L;
 	// object states
-	private enum EState {idle, drawing};
+	private enum EState {idleTP, drawingTP, idleNP, drawingNP};
+	private EState eState = EState.idleTP;
 	// components
 	private Vector<GShape> shapeVector;	
 	// associative attributes
 	private GShape selectedShape;
 	public void setSelectedShape(GShape selectedShape) {
 		this.selectedShape = selectedShape;
+		switch(this.selectedShape.geteDrawingType()){
+			case TP :	eState = EState.idleTP;	break;
+			case NP	:	eState = EState.idleNP;	break;
+		}
 	}	
 	// working objects;
 	private GShape currentShape;
@@ -36,6 +45,15 @@ public class GDrawingPanel extends JPanel {
 	public void initialize() {
 	}
 	
+	private void changePointShape(int x, int y) {
+		for(GShape shape:this.shapeVector){
+			if(shape.on(x, y)){
+				this.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+			}else{
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			}
+		}
+	}
 	public void paint(Graphics g) {
 		for (GShape shape: this.shapeVector) {
 			shape.draw((Graphics2D)g);
@@ -46,8 +64,16 @@ public class GDrawingPanel extends JPanel {
 		this.currentShape= this.selectedShape.clone();
 		Graphics2D g2D = (Graphics2D)this.getGraphics();
 		g2D.setXORMode(this.getBackground());
-		this.currentShape.initDrawing(x, y, g2D);
+		if(this.getCursor().equals(Cursor.MOVE_CURSOR)){
+			Anchors anchor = new Anchors();
+			anchor.draw(g2D, getBounds());
+			if(currentShape.equals(new GPolygon()))	eState = EState.idleNP;
+			else	eState = EState.idleTP;
+		}else{
+			this.currentShape.initDrawing(x, y, g2D);	
+		}
 	}
+	
 	private void keepDrawing(int x, int y) {
 		Graphics2D g2D = (Graphics2D)this.getGraphics();
 		g2D.setXORMode(this.getBackground());
@@ -66,7 +92,6 @@ public class GDrawingPanel extends JPanel {
 	}	
 	class MouseEventHandler 
 		implements MouseInputListener, MouseMotionListener {
-		private EState eState = EState.idle;
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if (e.getClickCount() == 1) {
@@ -76,52 +101,45 @@ public class GDrawingPanel extends JPanel {
 			}
  		}
 		private void mouse1Clicked(MouseEvent e) {
-			if (eState == EState.idle) {
-				if (selectedShape.geteDrawingType() == EDrawingType.NP) {
-					initDrawing(e.getX(), e.getY());
-					eState = EState.drawing;
-		//			System.out.println("mouse1Clicked/idle");
-				}
-			} else if (eState == EState.drawing) {	
+			if (eState == EState.idleNP) {
+				initDrawing(e.getX(), e.getY());
+				eState = EState.drawingNP;
+			} else if (eState == EState.drawingNP) {	
 				continueDrawing(e.getX(), e.getY());			
-		//		System.out.println("mouse1Clicked/drawing");
 			}
 		}
 		private void mouse2Clicked(MouseEvent e) {
-			if (eState == EState.drawing) {		
+			if (eState == EState.drawingNP) {		
 				finishDrawing(e.getX(), e.getY());
-				eState = EState.idle;
-		//		System.out.println("mouse2Clicked/drawing");
+				eState = EState.idleNP;
 			}			
 		}
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (eState == EState.idle) {
+			if (eState == EState.idleTP) {
 				initDrawing(e.getX(), e.getY());
-				eState = EState.drawing;
-		//		System.out.println("mousePressed/idle");
+				eState = EState.drawingTP;
 			}		
 		}
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			if (eState == EState.drawing) {		
+			if (eState == EState.drawingTP) {		
 				finishDrawing(e.getX(), e.getY());
-				eState = EState.idle;
-		//		System.out.println("mouseReleased/drawing");
+				eState = EState.idleTP;
 			}
 		}
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if (eState == EState.drawing) {
+			if (eState == EState.drawingNP) {
 				keepDrawing(e.getX(), e.getY());
-		//		System.out.println("mouseMoved/drawing");
+			}else if(eState == EState.idleNP || eState == EState.idleTP){
+				changePointShape(e.getX(), e.getY());
 			}
-		}		
+		}	
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			if (eState == EState.drawing) {
+			if (eState == EState.drawingTP) {
 				keepDrawing(e.getX(), e.getY());
-		//		System.out.println("mouseDragged/drawing");
 			}
 		}
 		@Override

@@ -1,13 +1,16 @@
 package shapes;
 
 import java.awt.Graphics2D;
+import java.awt.Shape;
 
 import constants.GConstants.EDrawingType;
 
 abstract public class GShape {
+	protected Shape shape;
 	private EDrawingType eDrawingType;
 	public EDrawingType geteDrawingType() {	return eDrawingType;}
-	
+	protected Anchors anchor;
+	int x, y;
 	public GShape(EDrawingType eDrawingType){
 		this.eDrawingType = eDrawingType;
 	}
@@ -25,5 +28,12 @@ abstract public class GShape {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	public boolean on(int x, int y) {
+		this.x = x; this.y = y;
+		return shape.contains(x, y);
+	}
+	public void AnchorDraw(){
+		
 	}
 }
