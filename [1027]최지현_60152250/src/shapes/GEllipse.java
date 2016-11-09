@@ -1,42 +1,64 @@
 package shapes;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Ellipse2D;
 
 import constants.GConstants.EDrawingType;
 
 public class GEllipse extends GShape {
-	private int x, y, w, h;
+	private Ellipse2D ellipse;
 	public GEllipse() {
 		super(EDrawingType.TP);
-		this.x = 0;
-		this.y = 0;
-		this.w = 0;
-		this.h = 0;
+		ellipse = new Ellipse2D.Double();
+		this.shape = this.ellipse;
+		this.ellipse.setFrame(0	, 0, 0, 0);
 	}
+	public Ellipse2D getShape(){	return ellipse;	}
 	@Override
 	public void initDrawing(int x, int y, Graphics2D g2D) {
-		this.x = x;
-		this.y = y;		
-		this.w = 0;
-		this.h = 0;
+		this.ellipse.setFrame(x, y, 0, 0);
 	}
 	@Override
 	public void keepDrawing(int x, int y, Graphics2D g2D) {
 		this.draw(g2D);
-		this.w = x - this.x;
-		this.h = y - this.y;
+		this.ellipse.setFrame(ellipse.getX(), ellipse.getY(), x-ellipse.getX(), y-ellipse.getY());
 		this.draw(g2D);		
 	}
 	public void continueDrawing(int x, int y, Graphics2D g2D) {
 	}
 	@Override
 	public void finishDrawing(int x, int y, Graphics2D g2D) {
+		this.compareSize(g2D);
 	}
 	@Override
 	public void draw(Graphics2D g2D) {
-		if( w < 0 && h < 0)	g2D.drawOval(x+w, y+h, -this.w, -this.h);		
-		else if(w < 0)	g2D.drawOval(this.x+this.w, this.y, -this.w, this.h);		
-		else if(h < 0)	g2D.drawOval(this.x, this.y+this.h, this.w, -this.h);		
-		else	g2D.drawOval(this.x, this.y, this.w, this.h);		
+		if( this.ellipse.getWidth() < 0 && this.ellipse.getHeight() < 0){
+			g2D.drawOval((int)(ellipse.getWidth()+ellipse.getX()), (int)(this.ellipse.getY()
+					+this.ellipse.getHeight()), -(int)this.ellipse.getWidth(), -(int)this.ellipse.getHeight());
+		}else if(this.ellipse.getWidth() < 0){
+			g2D.drawOval((int)(this.ellipse.getX()+this.ellipse.getWidth()), (int)this.ellipse.getY(),
+					-(int)this.ellipse.getWidth(), (int)this.ellipse.getHeight());
+		}else if(this.ellipse.getHeight() < 0){		
+			g2D.drawOval((int)(this.ellipse.getX()), (int)(this.ellipse.getY()+this.ellipse.getHeight()),
+					(int)this.ellipse.getWidth(), -(int)this.ellipse.getHeight());
+		}
+		g2D.draw(ellipse);
+	}
+	public void compareSize(Graphics2D g2D){
+		if( this.ellipse.getWidth() < 0 && this.ellipse.getHeight() < 0){
+			this.ellipse.setFrame(ellipse.getX() + ellipse.getWidth(), ellipse.getY()+ellipse.getHeight(), 
+					-ellipse.getWidth(), -ellipse.getHeight());	
+		}else if(this.ellipse.getWidth() < 0){
+			this.ellipse.setFrame(ellipse.getX() + ellipse.getWidth(), ellipse.getY(), 
+					-ellipse.getWidth(), ellipse.getHeight());	
+		}else if(this.ellipse.getHeight() < 0){		
+			this.ellipse.setFrame(ellipse.getX(), ellipse.getY()+ellipse.getHeight(), 
+					ellipse.getWidth(), -ellipse.getHeight());	
+		}
+	}
+	public void AnchorDraw(Graphics2D g2D, Rectangle rectangle){
+		Anchors anchors = new Anchors();
+		anchors.draw(g2D, rectangle);
 	}
 }

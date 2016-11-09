@@ -1,6 +1,7 @@
 package shapes;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 
 import constants.GConstants.EDrawingType;
@@ -10,6 +11,7 @@ public class GLine extends GShape {
 	public GLine() {
 		super(EDrawingType.TP);
 		this.line = new Line2D.Double(0, 0, 0, 0);
+		shape = this.line;
 		this.line.setLine(0, 0, 0, 0);
 	}
 	@Override
@@ -32,4 +34,12 @@ public class GLine extends GShape {
 		g2D.draw(line);
 	//	g2D.drawLine(this.line.getX1(), this.line.getY2(), x2, y2);
 	}
+	public void AnchorDraw(Graphics2D g2D, Rectangle rectangle){
+		Anchors anchors = new Anchors();
+		if(rectangle.equals(null)){
+			System.out.println("ww");
+		}
+		anchors.draw(g2D, rectangle);
+	}
+
 }

@@ -2,14 +2,11 @@ package frames;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.Vector;
-
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
-
 import constants.GConstants.EDrawingType;
 import shapes.Anchors;
 import shapes.GPolygon;
@@ -25,6 +22,11 @@ public class GDrawingPanel extends JPanel {
 	private Vector<GShape> shapeVector;	
 	// associative attributes
 	private GShape selectedShape;
+	private GShape onshape;
+
+	// working objects;
+	private GShape currentShape;
+	
 	public void setSelectedShape(GShape selectedShape) {
 		this.selectedShape = selectedShape;
 		switch(this.selectedShape.geteDrawingType()){
@@ -32,9 +34,6 @@ public class GDrawingPanel extends JPanel {
 			case NP	:	eState = EState.idleNP;	break;
 		}
 	}	
-	// working objects;
-	private GShape currentShape;
-	
 	public GDrawingPanel() {
 		MouseEventHandler mouseEventHandler = new MouseEventHandler();
 		this.addMouseListener(mouseEventHandler);
@@ -49,6 +48,7 @@ public class GDrawingPanel extends JPanel {
 		for(GShape shape:this.shapeVector){
 			if(shape.on(x, y)){
 				this.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+				this.onshape = shape;
 			}else{
 				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
@@ -59,20 +59,20 @@ public class GDrawingPanel extends JPanel {
 			shape.draw((Graphics2D)g);
 		}
 	}
-	
 	private void initDrawing(int x, int y) {
 		this.currentShape= this.selectedShape.clone();
 		Graphics2D g2D = (Graphics2D)this.getGraphics();
 		g2D.setXORMode(this.getBackground());
-		if(this.getCursor().equals(Cursor.MOVE_CURSOR)){
-			Anchors anchor = new Anchors();
-			anchor.draw(g2D, getBounds());
-			if(currentShape.equals(new GPolygon()))	eState = EState.idleNP;
-			else	eState = EState.idleTP;
+		
+		if(this.getCursor()==Cursor.getDefaultCursor()){
+			this.currentShape.initDrawing(x, y, g2D);
 		}else{
-			this.currentShape.initDrawing(x, y, g2D);	
+			onshape.AnchorDraw(g2D, onshape.getShape().getBounds());
+			if(eState == EState.drawingNP)	eState = EState.idleNP;
+			else if(eState == EState.drawingTP) eState = EState.idleTP;
+			else{}	
+			}
 		}
-	}
 	
 	private void keepDrawing(int x, int y) {
 		Graphics2D g2D = (Graphics2D)this.getGraphics();

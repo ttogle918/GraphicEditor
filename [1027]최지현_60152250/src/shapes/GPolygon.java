@@ -10,6 +10,7 @@ public class GPolygon extends GShape {
 	public GPolygon() {
 		super(EDrawingType.NP);
 		this.polygon = new Polygon();
+		shape = this.polygon;
 	}
 	@Override
 	public void initDrawing(int x, int y, Graphics2D g2D) {
@@ -24,11 +25,13 @@ public class GPolygon extends GShape {
 		this.draw(g2D);
 	}
 	public void continueDrawing(int x, int y, Graphics2D g2D) {
+		this.draw(g2D);
 		this.polygon.addPoint(x, y);
 		this.draw(g2D);
 	}
 	@Override
 	public void finishDrawing(int x, int y, Graphics2D g2D) {
+		this.draw(g2D);
 		this.polygon.addPoint(x, y);
 		this.polygon.addPoint(this.polygon.xpoints[0], this.polygon.ypoints[0]);
 		this.draw(g2D);
